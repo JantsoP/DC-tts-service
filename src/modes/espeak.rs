@@ -152,7 +152,7 @@ pub fn get_voices() -> &'static [String] {
                 Err(_) => {
                     // Directory doesn't exist - espeak-ng might not be properly configured
                     // Return empty list instead of failing
-                    tracing::warn!("eSpeak voices directory not found at {}", astr!(voices_path));
+                    tracing::warn!("eSpeak voices directory not found at {}", ESPEAK_NG_DATA_PATH);
                     anyhow::Ok(Vec::new())
                 }
             }
