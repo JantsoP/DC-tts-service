@@ -26,7 +26,10 @@ FROM debian:unstable-slim
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     libssl3 \
-    espeak \
+    espeak-ng-data \
+    espeak-ng \
+    mbrola \
+    mbrola-en1 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
