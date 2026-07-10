@@ -37,7 +37,7 @@ impl songbird::input::Compose for TTSSource {
         match crate::get_tts_inner(crate::STATE.get().unwrap(), request).await {
             Ok((audio, _)) => {
                 let input = Box::new(std::io::Cursor::new(audio));
-                Ok(AudioStream { input, hint: None })
+                Ok(AudioStream { input })
             }
             Err(err) => Err(AudioStreamError::Fail(ErrWrapper(err).into())),
         }
