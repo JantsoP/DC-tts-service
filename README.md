@@ -25,12 +25,39 @@ Non-200 responses will return a JSON object with the following keys:
 ### `display` - str
 A human readable message describing the error
 
+## Docker Setup
+
+### Build
+```bash
+docker build -t tts-service:local .
+```
+
+### Run with Docker Compose
+```bash
+docker-compose up
+```
+
+This will:
+- Build the image with tag `tts-service:local`
+- Start the service on port 3000
+- Load environment variables from `.env`
+
+### Run with Docker directly
+```bash
+docker run -p 3000:3000 --env-file .env tts-service:local
+```
+
 ## Environment Variables (default)
 - `BIND_ADDR`(`0.0.0.0:3000`) - The address to bind the web server to
 
 - `LOG_LEVEL`(`INFO`) - The lowest log level to output to stdout
 
 - `AUTH_KEY` - If set, this key must be sent in the `Authorization` header of each request
+
+### DeepL API (for translation features)
+- `DEEPL_API_TIER` - DeepL API tier (`Free` for free tier or `Pro` for pro tier). Defaults to `Free`
+
+- `DEEPL_KEY` - DeepL API key
 
 ### gTTS Required
 - `IPV6_BLOCK` - A block of IPv6 addresses, randomly selected for each gTTS request

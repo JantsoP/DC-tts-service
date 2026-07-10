@@ -4,6 +4,17 @@ use anyhow::Result;
 use serde::ser::SerializeStruct;
 use small_fixed_array::FixedString;
 
+fn get_deepl_api_url() -> String {
+    let tier = std::env::var("DEEPL_API_TIER")
+        .unwrap_or_else(|_| "Free".to_string())
+        .to_lowercase();
+    
+    match tier.as_str() {
+        "pro" => "https://api.deepl.com".to_string(),
+        _ => "https://api-free.deepl.com".to_string(),
+    }
+}
+
 fn deserialize_single_seq<'de, T, D>(deserializer: D) -> Result<Option<T>, D::Error>
 where
     T: serde::Deserialize<'de>,
@@ -64,8 +75,10 @@ pub async fn run(
         preserve_formatting: 1,
     };
 
+    let api_url = format!("{}/v2/translate", get_deepl_api_url());
+    
     let response: TranslateResponse = reqwest
-        .get("https://api.deepl.com/v2/translate")
+        .get(&api_url)
         .query(&request)
         .header("Authorization", auth_header(token))
         .send()
@@ -103,8 +116,10 @@ impl serde::Serialize for VoiceRequest {
 
 pub async fn get_languages(
     reqwest: &reqwest::Client,
-    token: &str,
-) -> Result<Vec<(FixedString, FixedString)>> {
+    tokeapi_url = format!("{}/v2/languages", get_deepl_api_url());
+    
+    let languages: Vec<Voice> = reqwest
+        .get(&api_url
     let languages: Vec<Voice> = reqwest
         .get("https://api.deepl.com/v2/languages")
         .query(&VoiceRequest)
