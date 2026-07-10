@@ -127,24 +127,37 @@ pub fn get_voices() -> &'static [String] {
     VOICES.get_or_init(|| {
         (|| {
             let mut files = Vec::new();
-            for file in std::fs::read_dir(aformat!("{}/voices/mb", astr!(ESPEAK_NG_DATA_PATH)))? {
-                let file = file?;
-                if file.file_type()?.is_file() {
-                    let file_name = file.file_name().into_string().expect("Invalid filename!");
-                    let mut file_name_iter = file_name.split('-').skip(1);
+            let voices_path = aformat!("{}/voices/mb", astr!(ESPEAK_NG_DATA_PATH));
+            
+            // If the directory doesn't exist, return empty list (espeak-ng might not be fully configured)
+            match std::fs::read_dir(&voices_path) {
+                Ok(entries) => {
+                    for file in entries {
+                        let file = file?;
+                        if file.file_type()?.is_file() {
+                            let file_name = file.file_name().into_string().expect("Invalid filename!");
+                            let mut file_name_iter = file_name.split('-').skip(1);
 
-                    if let Some(language) = file_name_iter.next()
-                        && file_name_iter.next().is_none()
-                    {
-                        files.push(language.to_owned());
+                            if let Some(language) = file_name_iter.next()
+                                && file_name_iter.next().is_none()
+                            {
+                                files.push(language.to_owned());
+                            }
+                        }
                     }
+
+                    files.sort();
+                    anyhow::Ok(files)
+                },
+                Err(_) => {
+                    // Directory doesn't exist - espeak-ng might not be properly configured
+                    // Return empty list instead of failing
+                    tracing::warn!("eSpeak voices directory not found at {}", astr!(voices_path));
+                    anyhow::Ok(Vec::new())
                 }
             }
-
-            files.sort();
-            anyhow::Ok(files)
         })()
-        .unwrap()
+        .unwrap_or_default()
     })
 }
 

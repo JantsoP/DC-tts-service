@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     build-essential \
     pkg-config \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy manifests
@@ -19,6 +20,23 @@ COPY src src
 # Build for release
 RUN cargo build --release
 
+# Build MBROLA from source
+FROM builder AS mbrola-builder
+
+WORKDIR /mbrola-build
+
+RUN git clone https://github.com/numediart/MBROLA.git . && \
+    make && \
+    cp Bin/mbrola /usr/local/bin/mbrola
+
+# Download MBROLA voice databases
+RUN git clone https://github.com/numediart/MBROLA-voices.git /mbrola-voices && \
+    mkdir -p /usr/local/share/espeak-ng-data/voices/mb && \
+    for voice in /mbrola-voices/*/; do \
+        voice_name=$(basename "$voice"); \
+        ln -s "$voice" "/usr/local/share/espeak-ng-data/voices/mb/$voice_name"; \
+    done
+
 # Runtime stage
 FROM debian:unstable-slim
 
@@ -29,6 +47,11 @@ RUN apt-get update && apt-get install -y \
     espeak-ng-data \
     espeak-ng \
     && rm -rf /var/lib/apt/lists/*
+
+# Copy MBROLA binary and voices from builder
+COPY --from=mbrola-builder /usr/local/bin/mbrola /usr/local/bin/mbrola
+COPY --from=mbrola-builder /mbrola-voices /usr/local/share/mbrola/voices
+COPY --from=mbrola-builder /usr/local/share/espeak-ng-data /usr/local/share/espeak-ng-data
 
 WORKDIR /app
 
