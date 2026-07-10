@@ -3,6 +3,13 @@ FROM rust:latest AS builder
 
 WORKDIR /usr/src/app
 
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    cmake \
+    build-essential \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy manifests
 COPY Cargo.toml Cargo.toml
 
