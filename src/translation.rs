@@ -116,12 +116,12 @@ impl serde::Serialize for VoiceRequest {
 
 pub async fn get_languages(
     reqwest: &reqwest::Client,
-    tokeapi_url = format!("{}/v2/languages", get_deepl_api_url());
+    token: &str,
+) -> Result<Vec<(FixedString, FixedString)>> {
+    let api_url = format!("{}/v2/languages", get_deepl_api_url());
     
     let languages: Vec<Voice> = reqwest
-        .get(&api_url
-    let languages: Vec<Voice> = reqwest
-        .get("https://api.deepl.com/v2/languages")
+        .get(&api_url)
         .query(&VoiceRequest)
         .header("Authorization", auth_header(token))
         .send()
